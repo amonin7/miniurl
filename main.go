@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -59,30 +60,13 @@ func (h *HttpHandler) handlePutUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HttpHandler) handleGetUrl(w http.ResponseWriter, r *http.Request) {
-	var data PutRequestData
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	key := strings.Trim(r.URL.Path, "/")
+	url, found := h.storage[key]
+	if !found {
+		http.NotFound(w, r)
 		return
 	}
-	newUrlKey := getRandomKey()
-	h.storage[newUrlKey] = data.Url
-	response := PutResponseData{
-		Key: newUrlKey,
-	}
-	rawResponse, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	_, err = w.Write(rawResponse)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
+	http.Redirect(w, r, url, http.StatusPermanentRedirect)
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
