@@ -8,11 +8,13 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
 type HttpHandler struct {
-	storage map[string]string
+	storageMu sync.RWMutex
+	storage   map[string]string
 }
 
 func getRandomKey() string {
@@ -40,7 +42,11 @@ func (h *HttpHandler) handlePutUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	newUrlKey := getRandomKey()
+
+	h.storageMu.Lock()
 	h.storage[newUrlKey] = data.Url
+	h.storageMu.Unlock()
+
 	response := PutResponseData{
 		Key: newUrlKey,
 	}
@@ -50,18 +56,20 @@ func (h *HttpHandler) handlePutUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(rawResponse)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
 }
 
 func (h *HttpHandler) handleGetUrl(w http.ResponseWriter, r *http.Request) {
 	key := strings.Trim(r.URL.Path, "/")
+	h.storageMu.RLock()
 	url, found := h.storage[key]
+	h.storageMu.RUnlock()
+
 	if !found {
 		http.NotFound(w, r)
 		return
@@ -78,7 +86,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 }
 
-func main() {
+func NewServer() *http.Server {
 	r := mux.NewRouter()
 
 	handler := &HttpHandler{
@@ -89,12 +97,16 @@ func main() {
 	r.HandleFunc("/{shorturl:\\w{5}}", handler.handleGetUrl).Methods(http.MethodGet)
 	r.HandleFunc("/api/urls", handler.handlePutUrl).Methods(http.MethodPost)
 
-	srv := &http.Server{
+	return &http.Server{
 		Handler:      r,
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+}
+
+func main() {
+	srv := NewServer()
 	log.Printf("Start serving on %s", srv.Addr)
 	log.Fatal(srv.ListenAndServe())
 }
