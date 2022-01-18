@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: URL Shortener
+  description: This is an API that shortens the links provided by the user.
+  version: 1.0.0
+paths:
+  /api/urls:
+    post:
+      summary: short url generation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+      responses:
+        200:
+          description: Short url is successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [key]
+                properties:
+                  key:
+                    type: string
+                    description: Key, which is used to make a redirect to the real link
+                    pattern: '\w{5}'
+  /{key}:
+    get:
+      parameters:
+        - in: path
+          name: key
+          description: The key that was obtained when creating a short link for the request `POST /api/urls`
+          schema:
+            type: string
+            pattern: '\w{5,10}'
+      responses:
+        308:
+          description: Redirection to the real address
+          headers:
+            Location:
+              required: true
+              description: The redirect address specified when creating the short link.
+        404:
+          description: This key is not a short link.
