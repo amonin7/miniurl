@@ -1,5 +1,11 @@
 # miniurl
 
+## Short description
+
+This is a service with which the user can get a shortened url. The service supports two functions:
+- shorten the url provided by the user;
+- redirect the user from the shortened url to the real one.
+
 ## Installation guide
 
 1. Start [Docker](https://www.docker.com/) on your machine
