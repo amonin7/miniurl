@@ -18,4 +18,5 @@ docker-compose up --build
 
 - [Golang (version 1.17)](https://go.dev/)
 - [Docker (version 3)](https://www.docker.com/)
-- [MongoDB (version 4.4)](https://www.mongodb.com/)
+- [MongoDB (version 4.4)](https://www.mongodb.com/) - as main storage
+- [RedisDB (version 6.2.6)](https://redis.io/) - as a cache storage
