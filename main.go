@@ -5,6 +5,7 @@ import (
 	"log"
 	"miniurl/handlers"
 	"miniurl/storage/mongostorage"
+	"miniurl/storage/rediscachedstorage"
 	"net/http"
 	"os"
 	"time"
@@ -15,8 +16,11 @@ func NewServer() *http.Server {
 
 	mongoUrl := os.Getenv("MONGO_URL")
 	mongoStorage := mongostorage.NewStorage(mongoUrl)
+	redisUrl := os.Getenv("REDIS_URL")
+	redisStorage := rediscachedstorage.NewStorage(redisUrl, mongoStorage)
+
 	handler := &handlers.HttpHandler{
-		Storage: mongoStorage,
+		Storage: redisStorage,
 	}
 
 	r.HandleFunc("/", handlers.HandleRoot)
