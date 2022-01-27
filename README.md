@@ -20,3 +20,4 @@ docker-compose up --build
 - [Docker (version 3)](https://www.docker.com/)
 - [MongoDB (version 4.4)](https://www.mongodb.com/) - as main storage
 - [RedisDB (version 6.2.6)](https://redis.io/) - as a cache storage
+- [Driver for Redis](https://github.com/go-redis/redis) - to connect GoLang and Redis
