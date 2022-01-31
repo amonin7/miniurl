@@ -1,9 +1,11 @@
 package main
 
 import (
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	"log"
 	"miniurl/handlers"
+	"miniurl/ratelimit"
 	"miniurl/storage/mongostorage"
 	"miniurl/storage/rediscachedstorage"
 	"net/http"
@@ -16,12 +18,14 @@ func NewServer() *http.Server {
 
 	mongoUrl := os.Getenv("MONGO_URL")
 	mongoStorage := mongostorage.NewStorage(mongoUrl)
-	redisUrl := os.Getenv("REDIS_URL")
-	redisStorage := rediscachedstorage.NewStorage(redisUrl, mongoStorage)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: os.Getenv("REDIS_URL"),
+	})
+	cachedStorage := rediscachedstorage.NewStorage(mongoStorage, redisClient)
 
-	handler := &handlers.HttpHandler{
-		Storage: redisStorage,
-	}
+	rateLimitFactory := ratelimit.NewFactory(redisClient)
+
+	handler := handlers.NewHTTPHandler(cachedStorage, rateLimitFactory)
 
 	r.HandleFunc("/", handlers.HandleRoot)
 	r.HandleFunc("/{shorturl:\\w{5}}", handler.HandleGetUrl).Methods(http.MethodGet)

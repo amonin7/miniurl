@@ -10,22 +10,22 @@ import (
 
 const cacheTTL = 10 * time.Second
 
-func NewStorage(redisUrl string, persistenceStorage storage.Storage) *Storage {
+func NewStorage(persistentStorage storage.Storage, client *redis.Client) *Storage {
 	return &Storage{
-		persistence: persistenceStorage,
-		client:      redis.NewClient(&redis.Options{Addr: redisUrl}),
+		client:            client,
+		persistentStorage: persistentStorage,
 	}
 }
 
 type Storage struct {
-	persistence storage.Storage
-	client      *redis.Client
+	client            *redis.Client
+	persistentStorage storage.Storage
 }
 
 var _ storage.Storage = (*Storage)(nil)
 
 func (s *Storage) PutURL(ctx context.Context, url storage.ShortedURL) (storage.URLKey, error) {
-	key, err := s.persistence.PutURL(ctx, url)
+	key, err := s.persistentStorage.PutURL(ctx, url)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func (s *Storage) GetURL(ctx context.Context, key storage.URLKey) (storage.Short
 		return storage.ShortedURL(rawUrl), nil
 	}
 
-	url, err := s.persistence.GetURL(ctx, key)
+	url, err := s.persistentStorage.GetURL(ctx, key)
 	if err != nil {
 		return "", err
 	}
