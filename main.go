@@ -30,6 +30,7 @@ func NewServer() *http.Server {
 	r.HandleFunc("/", handlers.HandleRoot)
 	r.HandleFunc("/{shorturl:\\w{5}}", handler.HandleGetUrl).Methods(http.MethodGet)
 	r.HandleFunc("/api/urls", handler.HandlePutUrl).Methods(http.MethodPost)
+	r.HandleFunc("/maintenance/createIndices", handler.CreateIndices).Methods(http.MethodPost)
 
 	return &http.Server{
 		Handler:      r,
