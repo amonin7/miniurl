@@ -6,6 +6,7 @@ import (
 	"log"
 	"miniurl/handlers"
 	"miniurl/ratelimit"
+	"miniurl/storage"
 	"miniurl/storage/mongostorage"
 	"miniurl/storage/rediscachedstorage"
 	"net/http"
@@ -25,11 +26,16 @@ func NewServer() *http.Server {
 
 	rateLimitFactory := ratelimit.NewFactory(redisClient)
 
-	handler := handlers.NewHTTPHandler(cachedStorage, rateLimitFactory)
+	handler := handlers.NewHTTPHandler(
+		cachedStorage,
+		rateLimitFactory,
+		[]storage.IndexMaintainer{mongoStorage},
+	)
 
 	r.HandleFunc("/", handlers.HandleRoot)
 	r.HandleFunc("/{shorturl:\\w{5}}", handler.HandleGetUrl).Methods(http.MethodGet)
 	r.HandleFunc("/api/urls", handler.HandlePutUrl).Methods(http.MethodPost)
+	r.HandleFunc("/maintenance/createIndices", handler.CreateIndices).Methods(http.MethodPost)
 
 	return &http.Server{
 		Handler:      r,

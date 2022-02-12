@@ -7,21 +7,25 @@ import (
 	"miniurl/storage"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 )
 
-func NewHTTPHandler(storage storage.Storage, limiterFactory *ratelimit.Factory) *HttpHandler {
+func NewHTTPHandler(
+	storage storage.Storage,
+	limiterFactory *ratelimit.Factory,
+	indexMaintainers []storage.IndexMaintainer,
+) *HttpHandler {
 	return &HttpHandler{
-		Storage:   storage,
-		postLimit: limiterFactory.NewLimiter("post_url", 10*time.Second, 2),
-		getLimit:  limiterFactory.NewLimiter("get_url", 1*time.Minute, 10),
+		Storage:          storage,
+		indexMaintainers: indexMaintainers,
+		postLimit:        limiterFactory.NewLimiter("post_url", 10*time.Second, 2),
+		getLimit:         limiterFactory.NewLimiter("get_url", 1*time.Minute, 10),
 	}
 }
 
 type HttpHandler struct {
-	StorageMu sync.RWMutex
-	Storage   storage.Storage
+	Storage          storage.Storage
+	indexMaintainers []storage.IndexMaintainer
 
 	postLimit *ratelimit.Limiter
 	getLimit  *ratelimit.Limiter
@@ -104,4 +108,14 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain")
+}
+
+func (h *HttpHandler) CreateIndices(rw http.ResponseWriter, r *http.Request) {
+	for _, maintainer := range h.indexMaintainers {
+		if err := maintainer.EnsureIndices(r.Context()); err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	_, _ = rw.Write([]byte("All indices are successfully created"))
 }
