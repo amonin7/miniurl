@@ -26,7 +26,7 @@ func NewServer() *http.Server {
 
 	rateLimitFactory := ratelimit.NewFactory(redisClient)
 
-	handler := handlers.NewHTTPHandler(
+	handler := handlers.NewHttpHandler(
 		cachedStorage,
 		rateLimitFactory,
 		[]storage.IndexMaintainer{mongoStorage},

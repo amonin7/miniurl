@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func NewHTTPHandler(
+func NewHttpHandler(
 	storage storage.Storage,
 	limiterFactory *ratelimit.Factory,
 	indexMaintainers []storage.IndexMaintainer,
