@@ -22,7 +22,6 @@ type Storage struct {
 	persistentStorage storage.Storage
 }
 
-//TODO: planning to add mongo sharding
 var _ storage.Storage = (*Storage)(nil)
 
 func (s *Storage) PutURL(ctx context.Context, url storage.ShortedURL) (storage.URLKey, error) {
