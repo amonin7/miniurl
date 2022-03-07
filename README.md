@@ -1,4 +1,4 @@
-# miniurl
+# Mini url
 
 ## Short description
 
@@ -24,4 +24,4 @@ docker-compose up --build
 
 - This is made during [Design system course](http://wiki.cs.hse.ru/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD_%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC_21/22)
 taught by [HSE CS Faculty](https://cs.hse.ru/en/). 
-[Youtube playlist](https://youtube.com/playlist?list=PLEwK9wdS5g0riA4Q_fqcjkv0zYf6HgRGJ), [Course Github link](https://github.com/hse-system-design-2021/public)
+[Youtube playlist](https://youtube.com/playlist?list=PLEwK9wdS5g0riA4Q_fqcjkv0zYf6HgRGJ) + [Course Github link](https://github.com/hse-system-design-2021/public)
